@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talking hatchling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+        .character {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            background: url('dcc87ta-3d556cc0-9b25-4a94-afcb-9cdffe707032.png') center/cover no-repeat;
+            position: relative;
+        }
+        .apple {
+            width: 50px;
+            height: 50px;
+            background: url('images (2).jpg') center/cover no-repeat;
+            position: absolute;
+            cursor: grab;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .thank-you {
+            font-size: 20px;
+            color: green;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Talking hatchling</h1>
+
+    <div class="character" id="character"></div>
+
+    <div class="buttons">
+        <button onclick="shower()">Shower</button>
+        <button onclick="pat()">Pat</button>
+        <button onclick="location.reload()" >Boost</button>
+        <a class="button" href="./hatchlingame+.html" >Full version</a>
+    </div>
+
+    <div id="status" class="status">
+        Happiness: <span id="happiness">100</span> | Cleanliness: <span id="cleanliness">100</span> | Hunger: <span id="hunger">100</span> 
+    </div>
+
+    <div id="apples"></div>
+
+    <div id="thankYou" class="thank-you">Thank you!</div>
+
+    <audio id="patSound" src="Yay - Sound Effect.mp3"></audio>
+
+    <script>
+        let happiness = 100;
+        let cleanliness = 100;
+        let hunger = 100;
+
+        // Character DOM
+        const character = document.getElementById("character");
+        const happinessDisplay = document.getElementById("happiness");
+        const cleanlinessDisplay = document.getElementById("cleanliness");
+        const hungerDisplay = document.getElementById("hunger");
+        const thankYouMessage = document.getElementById("thankYou");
+
+        function updateStatus() {
+            happinessDisplay.textContent = happiness;
+            cleanlinessDisplay.textContent = cleanliness;
+            hungerDisplay.textContent = hunger;
+
+            if (happiness <= 0 || cleanliness <= 0 || hunger <= 0) {
+                character.style.backgroundImage = "url('Picsart_25-01-10_00-23-56-807.png')";
+            } else {
+                character.style.backgroundImage = "url('dcc87ta-3d556cc0-9b25-4a94-afcb-9cdffe707032.png')";
+            }
+        }
+
+        function shower() {
+            cleanliness = Math.min(cleanliness + 20, 100);
+            updateStatus();
+        }
+
+        function pat() {
+            const patSound = document.getElementById("patSound");
+            patSound.play();
+            happiness = Math.min(happiness + 10, 100);
+            updateStatus();
+        }
+
+        function createApple() {
+            const apple = document.createElement("div");
+            apple.className = "apple";
+
+            apple.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+            apple.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+
+            apple.draggable = true;
+            apple.ondragstart = (e) => {
+                e.dataTransfer.setData("text", "apple");
+                e.dataTransfer.effectAllowed = "move";
+            };
+
+            document.body.appendChild(apple);
+        }
+
+        // Allow apples to be dragged to the character
+        character.ondragover = (e) => e.preventDefault();
+
+        character.ondrop = (e) => {
+            const data = e.dataTransfer.getData("text");
+            if (data === "apple") {
+                happiness = Math.min(happiness + 20, 100);
+                hunger = Math.min(hunger + 20, 100);
+                updateStatus();
+
+                const apple = document.querySelector(".apple");
+                if (apple) {
+                    document.body.removeChild(apple);
+                }
+
+                thankYouMessage.style.display = "block";
+                setTimeout(() => thankYouMessage.style.display = "none", 2000);
+
+                createApple();
+            }
+        };
+
+        // Generate 5 apples initially
+        for (let i = 0; i < 5; i++) {
+            createApple();
+        }
+
+        // Update status periodically
+        setInterval(() => {
+            happiness = Math.max(happiness - 1, 0);
+            cleanliness = Math.max(cleanliness - 1, 0);
+            hunger = Math.max(hunger - 1, 0);
+            updateStatus();
+        }, 1000);
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                console.log("Game is running in the background.");
+            } else {
+                console.log("Game is active again.");
+            }
+        });
+    </script>
+</body>
+</html>
